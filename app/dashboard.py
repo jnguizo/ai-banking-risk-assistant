@@ -36,7 +36,7 @@ def charger_modele():
 
 @st.cache_data
 def charger_donnees():
-    df = pd.read_csv('data/creditcard.csv')
+    df = pd.read_csv('data/creditcard_sample.csv')
     return df
 
 model, scaler = charger_modele()
