@@ -1,15 +1,2 @@
-# Dataset (trop volumineux pour GitHub)
-data/creditcard.csv
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
+# Clé API
 .env
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Models
-models/*.pkl
-models/*.joblib
