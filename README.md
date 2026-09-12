@@ -238,6 +238,20 @@ Analyse générative
 
 ---
 
+## 📸 Aperçu de l'application
+
+### Dashboard général
+
+![Dashboard général](screenshots/dashboard.png)
+
+### Analyse d'une transaction
+
+![Analyse d'une transaction](screenshots/transaction_analysis.png)
+
+### Performance du modèle
+
+![Performance du modèle](screenshots/ml_performance.png)
+
 ## 📁 Structure du projet
 
 ```text
