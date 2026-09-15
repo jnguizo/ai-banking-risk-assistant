@@ -1,3 +1,4 @@
+import requests
 import os
 import sys
 import joblib
@@ -6,7 +7,7 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
-
+API_URL = "http://127.0.0.1:8000/predict"
 # ============================================================
 # CONFIGURATION
 # ============================================================
@@ -551,100 +552,31 @@ if analyser:
         try:
 
             # ------------------------------------------------
-            # Transaction de référence
+            # Appel de l'API FastAPI
             # ------------------------------------------------
 
-            sample = (
-                df.drop(
-                    columns=["Class"]
-                )
-                .iloc[0]
-                .copy()
+            payload = {
+                "amount": float(montant),
+                "time": float(temps),
+            }
+
+            response = requests.post(
+                API_URL,
+                json=payload,
+                timeout=10,
             )
 
+            response.raise_for_status()
+            api_result = response.json()
 
-            # ------------------------------------------------
-            # Variables modifiées
-            # ------------------------------------------------
-
-            sample["Amount"] = montant
-
-            sample["Time"] = temps
-
-
-            # ------------------------------------------------
-            # Vérification des features
-            # ------------------------------------------------
-
-            if features is None:
-
-                st.error(
-                    "Impossible de déterminer l'ordre "
-                    "des variables du modèle."
-                )
-
-                st.stop()
-
-
-            # ------------------------------------------------
-            # DataFrame
-            # ------------------------------------------------
-
-            sample_df = pd.DataFrame(
-                [sample]
+            prediction = (
+                1
+                if api_result["prediction"] == "FRAUDE"
+                else 0
             )
 
-
-            # Respect de l'ordre d'entraînement
-            sample_df = sample_df[
-                features
-            ]
-
-
-            # ------------------------------------------------
-            # Standardisation
-            # ------------------------------------------------
-
-            sample_scaled = sample_df.copy()
-
-            sample_scaled[
-                ["Amount", "Time"]
-            ] = scaler.transform(
-                sample_df[
-                    ["Amount", "Time"]
-                ]
-            )
-
-
-            # ------------------------------------------------
-            # Prédiction
-            # ------------------------------------------------
-
-            prediction = model.predict(
-                sample_scaled
-            )[0]
-
-            proba = model.predict_proba(
-                sample_scaled
-            )[0][1]
-
-
-            # ------------------------------------------------
-            # Niveau de risque indicatif
-            # ------------------------------------------------
-
-            if proba < 0.20:
-
-                niveau_risque = "FAIBLE"
-
-            elif proba < 0.50:
-
-                niveau_risque = "MODÉRÉ"
-
-            else:
-
-                niveau_risque = "ÉLEVÉ"
-
+            proba = float(api_result["risk_score"])
+            niveau_risque = api_result["risk_level"]
 
             # ------------------------------------------------
             # Résultat
@@ -737,6 +669,15 @@ if analyser:
                 rapport
             )
 
+
+        except requests.exceptions.RequestException as e:
+
+            st.error(
+                "Impossible de contacter l'API FastAPI. "
+                "Vérifiez que le serveur Uvicorn est démarré."
+            )
+
+            st.exception(e)
 
         except Exception as e:
 
